@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chatting Application</title>
+		<style>
+			#username_box
+			{
+				width: 250px;
+				height: 200px;
+				padding: 10px;
+				border: 30px;
+				margin-left: 650px;
+				margin-right: 510px;
+				margin-top: 200px;
+				text-align: center; 
+				position: fixed;
+				border-radius: 30px;
+				background:  url(https://s-media-cache-ak0.pinimg.com/originals/be/60/36/be6036a0063b12ba74dd40208becb554.jpg);
+			}
+			
+			#name
+			{
+				width: 200px;
+				height: 25px;
+				font-family: "Times New Roman", Times, serif;
+				border: 2px solid black;
+				border-radius: 30px;
+				padding: 0 8px;
+			}
+
+			#button, #send
+			{
+				width: 50px;
+				font-family: "Times New Roman", Times, serif;
+				border: 1px solid black;
+				border-radius: 30px;
+			}
+			
+			#window
+			{
+				width: 500px;
+				height: 600px;
+				padding: 10px;
+				border: 2px solid red;
+				margin-left: 25px;
+				margin-top: 50px;
+				border-radius: 30px;
+				background-image: url(http://www.the-hideout.com/files/QuickSiteImages/the-western-gaines-request.jpg);
+				//background: linear-gradient(to top, #0000ff 0%, #ff0000 100%);
+			}
+			
+			/*a { text-decoration: none; }
+			
+			a:hover { text-decoration: underline }
+			*/
+			#menu { padding:12.5px 25px 12.5px 25px; }
+  
+			.welcome { float:left; }
+  
+			.logout { float:right; }
+			
+			#chatbox
+			{
+				width: 420px;
+				height: 300px;
+				padding: 15px;
+				background-image: url(https://ak8.picdn.net/shutterstock/videos/17598904/thumb/1.jpg);
+				margin-left: 20px;
+				margin-top: 20px;
+				text-align: left;
+				font-size: 13px;
+				border: 1px solid black; 
+				overflow: auto;
+				word-wrap: break-word;
+			}
+			
+			#message
+			{
+				width: 380px;
+				height: 25px;
+				font-family: "Times New Roman", Times, serif;
+				margin-left: 20px;
+				margin-top: 10px;
+				margin-right: 12px;
+				border: 2px solid black;
+				border-radius: 30px;
+				padding: 0 8px;
+			}
+			
+			
+		</style>
+	</head>
+	<body background="http://cdn.wonderfulengineering.com/wp-content/uploads/2016/01/black-wallpaper-7.jpg">> 
+	<div id="username_box">
+		<br><font face="Comic sans MS" size="5" style="color:black"><b>Chit Chat</b></font>
+		<br><br><div id="error" style="color:white"></div>
+		<br><input type="text" id="name" value="" placeholder="  Enter the username">
+		<br><br><input id="button" type="button" onclick="setUsername()" value="Enter">
+	</div>
+	</body>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var socket = io();
+		function setUsername()
+		{
+			socket.emit('setUsername',document.getElementById("name").value);
+		}
+		
+		socket.on('userExists',function(data) {
+			document.getElementById("error").innerHTML = data;
+		});
+	
+		var user;
+		
+		socket.on('userSet',function(data) {
+			user = data.username;
+			document.body.innerHTML = '<br><br>\
+			<div id="window">\
+				<h2 style="font-family:Comic;color:red;text-align:center">Chit Chat</h2>\
+				<div id="menu">\
+					<p class="welcome"><b>Welcome, '+ user + '</b></p>\
+					<p class="logout"><button id="exit" type="button" onclick="logout()"><b>Exit Chat</b></button></p>\
+				</div>\
+				<div id="chatbox"></div>\
+				<input type="text" id="message" placeholder="  Enter the message here" onkeyup="pressenter()">\
+				<button type="submit" id="send" onclick="sendMessage()">Send</button>\
+			</div>';
+		
+		socket.emit('request_for_joining','<b>' + user + ' has joined the chat session</b>');
+		
+		});
+		
+		socket.on('response_joined',function(data) {											/*function for telling all clients except the sender client about who joined the session*/
+			document.getElementById('chatbox').innerHTML += data;
+		});
+		
+		function pressenter() 																								/*function called everytime a key is brought up in message input box */
+		{
+			document.getElementById("message").addEventListener("keyup", function(event) {
+				if (event.keyCode == 13) 
+				{
+					document.getElementById("send").click();
+				}
+			});
+		}
+		
+		document.getElementById("name").addEventListener("keyup", function(event) {
+				event.preventDefault();
+				if (event.keyCode == 13) 
+				{
+					document.getElementById("button").click();
+				}
+			});
+		
+		function logout()									/*function for leaving chat session*/
+		{
+			socket.emit('logout', user);
+		}
+		
+		socket.on('exit',function(data) {					/*function for telling all clients connected about the client just left*/
+			var text = '<div style="color:red"><i><b> ' + data + ' has left the chat session.</b></i></div>';
+			document.getElementById("chatbox").innerHTML += text;
+		});
+		
+		socket.on('alert',function(data) {    /* function to alert the disconnect client to refresh the page for resuming chat*/
+			alert(data);
+		});
+		
+		function sendMessage()
+		{
+			var date = new Date();
+				var hour = date.getHours();
+				var minutes = date.getMinutes();
+				var temp = 'AM';
+				if( hour > 12 )
+				{
+					hour -= 12; 
+					temp = 'PM';
+				}
+			var time = '(' + hour + ':' + minutes + ' ' + temp + ')';
+			var msg = document.getElementById("message").value;
+			if(msg)
+			{
+				socket.emit('request',{ message : msg , user : user, time : time});
+			}
+			document.getElementById("message").value="";
+		}
+		
+		socket.on('response',function(data) {
+			if(user)
+			{
+				var scroll = document.getElementById('chatbox');
+				scroll.scrollTop = scroll.scrollHeight;
+				document.getElementById("chatbox").innerHTML += '<div>' + data.time + '<b> ' + data.user + '</b> : ' + data.message + '</div>';
+			}
+		});	
+		
+		window.addEventListener('load',function() { 						/*makes the cursor to focus and select on username textbox once window loads*/
+			document.getElementById('name').focus();
+			document.getElementById('name').select();
+		});
+	
+	</script>
+</html>

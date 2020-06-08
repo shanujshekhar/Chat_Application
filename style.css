@@ -1,0 +1,22 @@
+/* CSS Document */
+
+#username_box
+{
+	width: 250px;
+	padding: 10px;
+	border: 25px;
+	background-color: rgba(255,0,0,0.6);
+	text-align: center;
+	position: center;
+}
+
+#name
+{
+	width: 200px;
+	font-family: "Times New Roman", Times, serif;
+}
+
+#button
+{
+	font-family: "Times New Roman", Times, serif;
+}

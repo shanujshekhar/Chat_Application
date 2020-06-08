@@ -1,0 +1,48 @@
+<body>
+	<h2 style="color:rgb(175,0,255)">User1</h2>
+
+	Enter Message Here : 
+	<form name="sender">
+		<input type="text" id="message" name="message" size="30">
+	</form>
+	
+	<button id="send">Send</button>
+
+	<p id="demo"></p>
+	
+</body>
+
+<head>
+	<script>
+	
+		window.onload = function()
+		{
+			var receiver = window.open("file:///F:/Summer/Nodejs Files/User2.html");
+			
+			var messageEle = document.getElementById("demo");
+			
+			var btn = document.getElementById("send");
+			
+			function receiveMessage(e)
+			{
+				var data = '<br><span style="color:blue">User2: ' + e.data + '</span>';
+				messageEle.innerHTML += data;
+			}
+			
+			function sendMessage(e)
+			{
+				var text = document.getElementById('message').value;
+				receiver.postMessage(text, "*");
+				text = '<br><span style="color:red">User1: ' + text + '</span>';
+				document.getElementById("demo").innerHTML += text;
+			}
+			
+			
+			btn.addEventListener('click',sendMessage);
+			window.addEventListener('message',receiveMessage);
+			
+		}
+		
+
+	</script>
+</head>

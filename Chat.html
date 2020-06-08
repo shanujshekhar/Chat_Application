@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+  <meta charset="utf-8" />
+  <title>WebSocket Test</title>
+  <script language="javascript" type="text/javascript">
+  
+  var wsUri = "wss://localhost:8080/";
+  var output;
+  var btn;
+  var btn;
+  
+  function init	()
+  {
+    output = document.getElementById("output");
+	btn = document.getElementById("send");
+	btn1 = document.getElementById("close");
+	
+	btn.addEventListener('click', doSend, false);
+	//btn1.addEventListener('click', onClose(evt), false);
+	
+	testWebSocket();
+  }
+
+  function testWebSocket()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };
+	console.log(websocket.readyState);
+  }
+	
+  function onOpen(evt)
+  {
+    writeToScreen("CONNECTED");
+  }
+
+  function onClose(evt)
+  {
+    writeToScreen("DISCONNECTED");
+  }
+
+  function onMessage(evt)
+  {
+    writeToScreen('<span style="color: blue;">Response: ' + evt.data+'</span>');
+    //websocket.close();
+  }
+
+  function onError(evt)
+  {
+    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+  }
+
+  function doSend()
+  {
+	var data = document.getElementById('message').value;
+	var text = '<span style="color: red;">Sent: ' + data +'</span>'
+    writeToScreen(text);
+    websocket.send(data);
+  }
+
+  function writeToScreen(message)
+  {
+    var pre = document.createElement("p");
+    pre.style.wordWrap = "break-word";
+    pre.innerHTML = message;
+    output.appendChild(pre);
+  }  
+	
+	window.addEventListener('load', init, false);
+	//window.addEventListener('message',receiveMessage);
+	
+
+  </script>
+<body>
+	<h2 style="color:rgb(175,0,255)">Chat App</h2>
+
+	Enter Message Here : 
+	<form name="sender">
+		<input type="text" id="message" name="message" size="30">
+	</form>
+	
+	<button id="send">Send</button>
+	<button id="close">Close</button>
+
+	<div id="output"></div>
+</body>
+  
